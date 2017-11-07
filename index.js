@@ -5,7 +5,7 @@ const bot = new Discord.Client();
 
 var api = new Client();
 
-const getTrade = async function (currencypair, exchange = 'kraken') => {
+const getTrade = async(currencypair, exchange = 'kraken') => {
   let options = null;
   if (exchange === 'gdax') {
     options = {
@@ -30,7 +30,7 @@ const getTrade = async function (currencypair, exchange = 'kraken') => {
   return (options ? await rp(options) : false);
 }
 
-const getAssetPairs = async function () => {
+const getAssetPairs = async() => {
   // https://api.gdax.com/products
   const options = {
     method: 'GET',
