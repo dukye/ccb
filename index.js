@@ -110,7 +110,8 @@ bot.on('message', message => {
       .catch(err => console.log(err));
   }
 });
-
+console.log(process.env.DISCORDBOT)
+console.log(process.env.PORT)
 bot.login(process.env.DISCORDBOT);
 
 
