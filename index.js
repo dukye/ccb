@@ -118,7 +118,7 @@ bot.on('message', message => {
   }
 });
 
-bot.login('Mzc3MjE4NDc2MTIyNzAxODI0.DOJxPg.XlGoxOjQWK6o817P7KYhitb_krM');
+bot.login(process.env.DISCORDBOT);
 
 
 /*
