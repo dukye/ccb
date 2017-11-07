@@ -3,13 +3,6 @@ const Client = require('node-rest-client').Client;
 var rp = require('request-promise');
 const bot = new Discord.Client();
 
-var http = require('http');  
-http.createServer(function (req, res) {  
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello World\n');
-}).listen(process.env.PORT || 8080, '127.0.0.1');
-console.log('Server currently listening...');  
-
 var api = new Client();
 
 const getTrade = async (currencypair, exchange = 'kraken') => {
@@ -120,6 +113,13 @@ bot.on('message', message => {
 
 bot.login(process.env.DISCORDBOT);
 
+
+var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('Hello World\n');
+}).listen(process.env.PORT || 8080, '127.0.0.1');
+console.log('Server currently listening...');
 
 /*
 var args = {
