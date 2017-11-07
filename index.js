@@ -60,7 +60,7 @@ bot.on('message', message => {
   const regPair = new RegExp('^assetpairs$', 'i');
   const matchassets = msg.match(regPair);
   if (matchassets) {
-    console.log(msg.match(matchassets));
+    // console.log(msg.match(matchassets));
     getAssetPairs()
       .then((result) => {
         if (result && result.result) {
@@ -78,12 +78,12 @@ bot.on('message', message => {
    */
   const reg = new RegExp('^((lasttrade)\ ([A-Z\-]{1,10})(\ (gdax|kraken)?)?)', 'i');
   const match = msg.match(reg);
-  console.log(match);
+  // console.log(match);
   if (match) {
     const currency = match[3];
     const exchange = match[5] || null; // without space ' gdax', 'gdax'
 
-    console.log(`--> Request from ${user.username}`);
+    // console.log(`--> Request from ${user.username}`);
     getTrade(currency, exchange)
       .then((result) => {
         // console.log(result);
