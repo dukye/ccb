@@ -1,10 +1,24 @@
 const Discord = require('discord.js');
 const Client = require('node-rest-client').Client;
-var rp = require('request-promise');
+const rp = require('request-promise');
 const bot = new Discord.Client();
+const api = new Client();
 
-var api = new Client();
+// Just run a little http page
+var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('Hello World\n');
+}).listen(process.env.PORT || 8080);
+console.log('HTTP Server running & listening...');
 
+/**
+ * getTrade
+ * @param currencypair string
+ * @type {function}
+ * @param exhcange string || null
+ * @return Promise
+ */
 const getTrade = async(currencypair, exchange = 'kraken') => {
   let options = null;
   if (exchange === 'gdax') {
@@ -30,19 +44,37 @@ const getTrade = async(currencypair, exchange = 'kraken') => {
   return (options ? await rp(options) : false);
 }
 
-const getAssetPairs = async() => {
-  // https://api.gdax.com/products
-  const options = {
-    method: 'GET',
-    uri: 'https://api.kraken.com/0/public/AssetPairs',
-    json: true,
-  };
+/**
+ * getAssetPairs
+ * @type {function}
+ * @param currencypair string
+ * @param exhcange string || null
+ * @return Promise
+ */
+const getAssetPairs = async(exchange = 'kraken') => {
+  let options = null;
+  if (exchange === 'gdax') {
+    options = {
+      method: 'GET',
+      uri: 'https://api.gdax.com/products',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36',
+      },
+      json: true,
+    };
+  } else {
+    options = {
+      method: 'GET',
+      uri: 'https://api.kraken.com/0/public/AssetPairs',
+      json: true,
+    };
+  }
 
   return await rp(options);
 }
 
 bot.on('ready', () => {
-  console.log('I am ready!');
+  console.log('Discord Bot is running...');
 });
 
 bot.on('message', message => {
@@ -57,16 +89,20 @@ bot.on('message', message => {
    * Get assets pairs
    * @type {RegExp}
    */
-  const regPair = new RegExp('^assetpairs$', 'i');
+  const regPair = new RegExp('^(assetpairs(\ (gdax|kraken)?)?)$', 'i');
   const matchassets = msg.match(regPair);
   if (matchassets) {
-    // console.log(msg.match(matchassets));
-    getAssetPairs()
+    const exchange = matchassets[3] || null; // without space ' gdax', 'gdax'
+    getAssetPairs(exchange)
       .then((result) => {
+        if (result && result[0] && result[0].id) {
+          const allpairs = result.map((obj) => obj.id);
+          message.reply(`\n[GDAX] Asset pairs\n-----\n${allpairs.join(', ')}`);
+        }
         if (result && result.result) {
           const dataPair = result.result;
           const allpairs = [];
-          message.reply(`\nAsset pairs\n-----\n${Object.keys(dataPair).join(', ')}`);
+          message.reply(`\n[KRAKEN] Asset pairs\n-----\n${Object.keys(dataPair).join(', ')}`);
         }
       })
       .catch(err => console.log(err));
@@ -92,7 +128,7 @@ bot.on('message', message => {
           const tradeLast = parseFloat(result.last).toFixed(2);
           const tradeLow = parseFloat(result.low).toFixed(2);
           const tradeHigh = parseFloat(result.high).toFixed(2);
-          message.reply(`\nLast trade on Gdax\n-----\nLast: ${tradeLast}\nLow: ${tradeLow}\nHigh: ${tradeHigh}`);
+          message.reply(`\n[GDAX] Last trade on Gdax\n-----\nLast: ${tradeLast}\nLow: ${tradeLow}\nHigh: ${tradeHigh}`);
         }
         // Kraken
         if (result && result.result) {
@@ -102,7 +138,7 @@ bot.on('message', message => {
             if (obj[0] === last) {
               const tradeBid = parseFloat(obj[1]).toFixed(2);
               const tradeAsk = parseFloat(obj[2]).toFixed(2);
-              message.reply(`\nLast trade at ${new Date(new Date().getTime(parseInt(obj[0])))}:\n-----\nBid: ${tradeBid}€\nAsk: ${tradeAsk}`);
+              message.reply(`\n[KRAKEN] Last trade at ${new Date(new Date().getTime(parseInt(obj[0])))}:\n-----\nBid: ${tradeBid}€\nAsk: ${tradeAsk}`);
             }
           })
         }
@@ -110,28 +146,5 @@ bot.on('message', message => {
       .catch(err => console.log(err));
   }
 });
-console.log(process.env.DISCORDBOT)
-console.log(process.env.PORT)
+
 bot.login(process.env.DISCORDBOT);
-
-
-var http = require('http');
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello World\n');
-}).listen(process.env.PORT || 8080);
-console.log('Server currently listening...');
-
-/*
-var args = {
-  data: { pair: currency },
-  headers: { 'Content-Type': 'application/json' },
-};
-
-api.post('https://api.kraken.com/0/public/Spread', args, (data, response) => {
-  // parsed response body as js object
-  console.log(data);
-  // raw response
-  console.log(response);
-});
-*/
