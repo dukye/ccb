@@ -12,6 +12,29 @@ http.createServer(function (req, res) {
 }).listen(process.env.PORT || 8080);
 console.log('HTTP Server running & listening...');
 
+
+/**
+ * Rich embed discord
+ * @type {Discord}
+ */
+const makeEmbed = (title, desc, elements = []) => {
+  const embed = new Discord.RichEmbed()
+    .setTitle(`${title}`)
+    // .setAuthor('CryptoBot', 'http://www.scpc.org.au/wp-content/uploads/2016/10/rocketkid-1024x682.jpg')
+    .setColor(0x4671ed)
+    .setDescription(desc)
+    .setTimestamp()
+    .setFooter('-- to the moon');
+
+    elements.forEach((obj, i) => {
+      embed.addField(obj.title, obj.value, true)
+      if ((i+=1) < elements.length) {
+        // embed.addBlankField(true);
+      }
+    });
+  return embed;
+};
+
 /**
  * getTrade
  * @param currencypair string
@@ -128,7 +151,23 @@ bot.on('message', message => {
           const tradeLast = parseFloat(result.last).toFixed(2);
           const tradeLow = parseFloat(result.low).toFixed(2);
           const tradeHigh = parseFloat(result.high).toFixed(2);
-          message.reply(`\n[GDAX] Last trade on Gdax\n-----\nLast: ${tradeLast}\nLow: ${tradeLow}\nHigh: ${tradeHigh}`);
+          // message.reply(`\n[GDAX] Last trade on Gdax\n-----\nLast: ${tradeLast}\nLow: ${tradeLow}\nHigh: ${tradeHigh}`);
+          message.channel.send(
+            makeEmbed(
+              'GDAX',
+              'Last trade',
+              [{
+                title: 'Last',
+                value: `${tradeLast}€`,
+              }, {
+                title: 'High',
+                value: `${tradeHigh}€`,
+              }, {
+                title: 'Low',
+                value: `${tradeLow}€`,
+              }]
+            )
+          );
         }
         // Kraken
         if (result && result.result) {
@@ -138,7 +177,20 @@ bot.on('message', message => {
             if (obj[0] === last) {
               const tradeBid = parseFloat(obj[1]).toFixed(2);
               const tradeAsk = parseFloat(obj[2]).toFixed(2);
-              message.reply(`\n[KRAKEN] Last trade at ${new Date(new Date().getTime(parseInt(obj[0])))}:\n-----\nBid: ${tradeBid}€\nAsk: ${tradeAsk}`);
+              // message.reply(`\n[KRAKEN] Last trade at ${new Date(new Date().getTime(parseInt(obj[0])))}:\n-----\nBid: ${tradeBid}€\nAsk: ${tradeAsk}`);
+              message.channel.send(
+                makeEmbed(
+                  'KRAKEN',
+                  'Last trade',
+                  [{
+                    title: 'Bid',
+                    value: `${tradeBid}€`,
+                  }, {
+                    title: 'Ask',
+                    value: `${tradeAsk}€`,
+                  }]
+                )
+              );
             }
           })
         }
