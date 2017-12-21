@@ -196,6 +196,15 @@ bot.on('message', message => {
         }
       })
       .catch(err => console.log(err));
+
+      /**
+       * 
+       */
+      const regPair = new RegExp('^!(\w+)\ \$(\w+)\ ([\w\.\s]+)$', 'i');
+      const matchcommands = msg.match(regPair);
+      if (matchcommands) {
+        console.log('command', matchcommands);
+      }
   }
 });
 
